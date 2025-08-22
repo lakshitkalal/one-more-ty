@@ -1,1 +1,52 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <title>My Trading Signals</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    #container { display:flex; gap:20px; }
+    #chart { width: 70%; height: 600px; border:1px solid #ddd; }
+    #panel { width: 30%; }
+    .signal { padding:10px; border-bottom:1px solid #eee; }
+  </style>
+</head>
+<body>
+  <h1>My Trading Signals</h1>
+  <div id="container">
+    <div id="chart">
+      <!-- Simple TradingView widget iframe -->
+      <iframe id="tv" src="https://s.tradingview.com/widgetembed/?frameElementId=tradingview_12345&symbol=BINANCE:BTCUSDT&interval=60" style="width:100%; height:100%; border:0"></iframe>
+    </div>
+    <div id="panel">
+      <h3>Live Signals</h3>
+      <div id="signals"></div>
+    </div>
+  </div>
 
+<script>
+const SIGNALS_URL = 'http://localhost:3000/signals';
+
+// fetch and show signals
+async function loadSignals(){
+  try{
+    const res = await fetch(SIGNALS_URL);
+    const data = await res.json();
+    const el = document.getElementById('signals');
+    el.innerHTML = '';
+    data.forEach(s => {
+      const d = document.createElement('div');
+      d.className = 'signal';
+      d.innerHTML = `<strong>${s.signal}</strong> ${s.symbol} @ ${s.price}<br><small>conf: ${Number(s.confidence).toFixed(2)} • ${s.ts}</small>`;
+      el.appendChild(d);
+    });
+  }catch(e){
+    console.error(e);
+    document.getElementById('signals').innerText = 'Error fetching signals. Make sure backend is running.';
+  }
+}
+loadSignals();
+setInterval(loadSignals, 5000); // refresh every 5s
+</script>
+</body>
+</html>
